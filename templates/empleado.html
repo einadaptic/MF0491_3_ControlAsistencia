@@ -3,15 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Ficha Empleado - {{ id_emp }}</title>
-    <style>
-        body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: center; }
-        th { background: #0f172a; color: white; }
-        .resumen { background: #f0fdf4; border: 1px solid #86efac; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
-        .btn { background: #64748b; color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.9rem; }
-    </style>
-</head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"></head>
 <body>
 
     <h1>👤 Historial Individual: {{ id_emp }}</h1>

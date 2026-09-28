@@ -4,29 +4,7 @@
     <meta charset="UTF-8">
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <title>Control de Asistencia</title>
-    <style>
-        body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-        form.fichaje { background: #f4f4f5; padding: 1rem; border-radius: 8px; display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
-        label { display: flex; flex-direction: column; font-size: 0.9rem; }
-        input, button { padding: 0.5rem; margin-top: 0.2rem; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: center; }
-        th { background: #0f172a; color: white; }
-        
-        .btn { background: #2563eb; color: white; border: none; cursor: pointer; border-radius: 4px; text-decoration: none; font-size: 0.85rem; padding: 0.4rem 0.8rem; }
-        .btn-danger { background: #dc2626; }
-        .btn-green { background: #16a34a; text-decoration: none; padding: 0.5rem 1rem; display: inline-block; margin-top: 1rem; color: white; border-radius: 4px; }
-        .btn-secondary { background: #64748b; color: white; text-decoration: none; padding: 0.5rem 0.8rem; border-radius: 4px; font-size: 0.85rem; }
-        
-        .alerta { padding: 0.8rem; margin-bottom: 1rem; border-radius: 4px; font-weight: bold; }
-        .alerta-error { background-color: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; }
-        .alerta-warning { background-color: #fffbe0; color: #b45309; border: 1px solid #fde047; }
-        .alerta-exito { background-color: #f0fdf4; color: #16a34a; border: 1px solid #86efac; }
-        
-        .acciones { display: flex; gap: 0.4rem; justify-content: center; }
-        .barra-busqueda { margin-top: 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .busqueda-form { display: flex; gap: 0.5rem; }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
 
