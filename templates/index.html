@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Control de Asistencia</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+        form { background: #f4f4f5; padding: 1rem; border-radius: 8px; display: flex; gap: 1rem; align-items: flex-end; }
+        label { display: flex; flex-direction: column; font-size: 0.9rem; }
+        input, button { padding: 0.5rem; margin-top: 0.2rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+        th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: center; }
+        th { background: #0f172a; color: white; }
+        .btn { background: #2563eb; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        .btn-green { background: #16a34a; text-decoration: none; padding: 0.5rem 1rem; display: inline-block; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+
+    <h1>🕒 Control de Asistencia ({{ fecha }})</h1>
+
+    <!-- Formulario de Fichaje -->
+    <form action="/fichar" method="POST">
+        <label>
+            Nº Empleado:
+            <input type="number" name="num_emp" min="1" max="999" placeholder="Ej: 1" required>
+        </label>
+        <label>
+            Entrada:
+            <input type="time" name="entrada" required>
+        </label>
+        <label>
+            Salida (Opcional):
+            <input type="time" name="salida">
+        </label>
+        <button type="submit" class="btn">Guardar Fichaje</button>
+    </form>
+
+    <!-- Historial de Fichajes -->
+    <table>
+        <thead>
+            <tr>
+                <th>Empleado</th>
+                <th>Fecha</th>
+                <th>Entrada</th>
+                <th>Salida</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in registros %}
+            <tr>
+                <td>{{ r.id_empleado }}</td>
+                <td>{{ r.fecha }}</td>
+                <td>{{ r.hora_entrada }}</td>
+                <td>{{ r.hora_salida or 'PENDIENTE' }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">No hay registros cargados.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="/descargar" class="btn btn-green">⬇️ Descargar JSON</a>
+
+</body>
+</html>
