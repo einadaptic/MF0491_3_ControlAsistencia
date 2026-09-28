@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, Response, redirect, url_for, 
 
 sys.path.append(str(Path(__file__).resolve().parent / "src"))
 
-from utils import cargar_datos, calcular_horas, formatear_horas
+from utils import cargar_datos
 from gestor import registrar_fichaje, buscar_registro, actualizar_fichaje, eliminar_fichaje
 
 app = Flask(__name__)
@@ -14,19 +14,30 @@ app.secret_key = "clave_secreta_control_asistencia"
 @app.route("/")
 def index():
     registros = cargar_datos()
-    # Si venimos de pulsar "Editar", recibimos los datos para rellenar el formulario
+    
+    # Capta el término introducido en la barra de búsqueda
+    busqueda = request.args.get("q", "").strip().lower()
+    
+    # Filtra por ID de empleado o por fecha si hay algo escrito
+    if busqueda:
+        registros = [
+            r for r in registros 
+            if busqueda in r["id_empleado"].lower() or busqueda in r["fecha"].lower()
+        ]
+
+    # Datos para el modo edición si se ha pulsado 'Editar'
     emp_editar = request.args.get("emp", "")
     fecha_editar = request.args.get("fecha", "")
-    
     reg_editar = None
     if emp_editar and fecha_editar:
-        reg_editar = buscar_registro(registros, emp_editar, fecha_editar)
+        reg_editar = buscar_registro(cargar_datos(), emp_editar, fecha_editar)
 
     return render_template(
         "index.html", 
         registros=registros, 
         fecha=datetime.now().strftime("%d/%m/%Y"),
-        reg_editar=reg_editar
+        reg_editar=reg_editar,
+        busqueda=busqueda
     )
 
 @app.route("/fichar", methods=["POST"])
@@ -41,13 +52,11 @@ def fichar():
 
     registros = cargar_datos()
 
-    # Si estamos editando un registro existente
     if es_edicion:
         actualizar_fichaje(registros, id_empleado, fecha, hora_entrada, hora_salida)
         flash(f"✔ Registro de {id_empleado} ({fecha}) actualizado correctamente.", "exito")
         return redirect(url_for("index"))
 
-    # Lógica habitual de fichaje nuevo
     registro_existente = buscar_registro(registros, id_empleado, fecha)
 
     if registro_existente and registro_existente["hora_salida"] is not None:
