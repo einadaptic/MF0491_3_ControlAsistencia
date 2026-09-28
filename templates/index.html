@@ -4,28 +4,31 @@
     <meta charset="UTF-8">
     <title>Control de Asistencia</title>
     <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
-        form { background: #f4f4f5; padding: 1rem; border-radius: 8px; display: flex; gap: 1rem; align-items: flex-end; }
+        body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        form.fichaje { background: #f4f4f5; padding: 1rem; border-radius: 8px; display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
         label { display: flex; flex-direction: column; font-size: 0.9rem; }
         input, button { padding: 0.5rem; margin-top: 0.2rem; }
         table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
         th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: center; }
         th { background: #0f172a; color: white; }
-        .btn { background: #2563eb; color: white; border: none; cursor: pointer; border-radius: 4px; }
-        .btn-green { background: #16a34a; text-decoration: none; padding: 0.5rem 1rem; display: inline-block; margin-top: 1rem; color: white; border-radius: 4px;}
         
-        /* Estilos para alertas */
+        .btn { background: #2563eb; color: white; border: none; cursor: pointer; border-radius: 4px; text-decoration: none; font-size: 0.85rem; padding: 0.4rem 0.8rem; }
+        .btn-danger { background: #dc2626; }
+        .btn-green { background: #16a34a; text-decoration: none; padding: 0.5rem 1rem; display: inline-block; margin-top: 1rem; color: white; border-radius: 4px; }
+        
         .alerta { padding: 0.8rem; margin-bottom: 1rem; border-radius: 4px; font-weight: bold; }
         .alerta-error { background-color: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; }
         .alerta-warning { background-color: #fffbe0; color: #b45309; border: 1px solid #fde047; }
         .alerta-exito { background-color: #f0fdf4; color: #16a34a; border: 1px solid #86efac; }
+        
+        .acciones { display: flex; gap: 0.4rem; justify-content: center; }
     </style>
 </head>
 <body>
 
     <h1>🕒 Control de Asistencia ({{ fecha }})</h1>
 
-    <!-- Bloque de avisos y validaciones -->
+    <!-- Avisos -->
     {% with mensajes = get_flashed_messages(with_categories=true) %}
       {% if mensajes %}
         {% for categoria, mensaje in mensajes %}
@@ -34,24 +37,40 @@
       {% endif %}
     {% endwith %}
 
-    <!-- Formulario de Fichaje -->
-    <form action="/fichar" method="POST">
+    <!-- Formulario (Modo Crear o Modo Editar) -->
+    <h3>{% if reg_editar %}✏️ Modificar Fichaje de {{ reg_editar.id_empleado }}{% else %}➕ Nuevo Fichaje{% endif %}</h3>
+    
+    <form action="/fichar" method="POST" class="fichaje">
+        <input type="hidden" name="es_edicion" value="{{ 'true' if reg_editar else 'false' }}">
+        <input type="hidden" name="fecha" value="{{ reg_editar.fecha if reg_editar else fecha }}">
+        
         <label>
             Nº Empleado:
-            <input type="number" name="num_emp" min="1" max="999" placeholder="Ej: 1" required>
+            <input type="number" name="num_emp" min="1" max="999" 
+                   value="{{ reg_editar.id_empleado[3:] | int if reg_editar else '' }}" 
+                   {% if reg_editar %}readonly{% endif %} required placeholder="Ej: 1">
         </label>
+        
         <label>
             Entrada:
-            <input type="time" name="entrada" required>
+            <input type="time" name="entrada" value="{{ reg_editar.hora_entrada if reg_editar else '' }}" required>
         </label>
+        
         <label>
             Salida (Opcional):
-            <input type="time" name="salida">
+            <input type="time" name="salida" value="{{ reg_editar.hora_salida if reg_editar else '' }}">
         </label>
-        <button type="submit" class="btn">Guardar Fichaje</button>
+        
+        <button type="submit" class="btn">
+            {% if reg_editar %}Actualizar{% else %}Guardar Fichaje{% endif %}
+        </button>
+
+        {% if reg_editar %}
+            <a href="/" class="btn btn-danger">Cancelar</a>
+        {% endif %}
     </form>
 
-    <!-- Historial de Fichajes -->
+    <!-- Tabla con Modificar y Eliminar -->
     <table>
         <thead>
             <tr>
@@ -59,6 +78,7 @@
                 <th>Fecha</th>
                 <th>Entrada</th>
                 <th>Salida</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -68,9 +88,20 @@
                 <td>{{ r.fecha }}</td>
                 <td>{{ r.hora_entrada }}</td>
                 <td>{{ r.hora_salida or 'PENDIENTE' }}</td>
+                <td class="acciones">
+                    <!-- Botón Modificar (Carga los datos en el formulario arriba) -->
+                    <a href="/?emp={{ r.id_empleado }}&fecha={{ r.fecha }}" class="btn">✏️ Editar</a>
+                    
+                    <!-- Botón Eliminar -->
+                    <form action="/eliminar" method="POST" style="display:inline;">
+                        <input type="hidden" name="id_empleado" value="{{ r.id_empleado }}">
+                        <input type="hidden" name="fecha" value="{{ r.fecha }}">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Seguro que deseas eliminar este fichaje?');">🗑️ Borrar</button>
+                    </form>
+                </td>
             </tr>
             {% else %}
-            <tr><td colspan="4">No hay registros cargados.</td></tr>
+            <tr><td colspan="5">No hay registros cargados.</td></tr>
             {% endfor %}
         </tbody>
     </table>

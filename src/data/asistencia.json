@@ -1,11 +1,5 @@
 [
     {
-        "id_empleado": "EMP001",
-        "fecha": "28/09/2026",
-        "hora_entrada": "10:34",
-        "hora_salida": "16:34"
-    },
-    {
         "id_empleado": "EMP003",
         "fecha": "28/09/2026",
         "hora_entrada": "11:53",
