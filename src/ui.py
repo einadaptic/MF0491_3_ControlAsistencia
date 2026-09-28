@@ -1,8 +1,8 @@
 # ==========================================
 # MÓDULO DE INTERFAZ DE USUARIO: ui.py
-# Vistas de consola y elementos de Rich
+# Vistas de consola, elementos de Rich y decoradores de flujo
 # ==========================================
-import platform, subprocess, re, time
+import platform, subprocess, re, functools
 from datetime import datetime
 from rich.console import Console
 from rich.panel import Panel
@@ -17,6 +17,37 @@ from gestor import buscar_registro, registrar_fichaje, actualizar_fichaje, elimi
 console      = Console()
 _ES_WINDOWS  = platform.system() == "Windows"
 _CMD_LIMPIAR = ["cls"] if _ES_WINDOWS else ["clear"]
+
+
+# ==========================================
+# DECORADOR PARA CONTROL DE CANCELACIÓN
+# ==========================================
+
+def capturar_cancelacion(func):
+    """
+    Decorador que envuelve las funciones de la vista para capturar Ctrl+C.
+    
+    Genera dinámicamente una cabecera de Panel basada en el nombre de la función 
+    vista (limpiando prefijos) y atrapa las interrupciones por teclado (KeyboardInterrupt),
+    mostrando un aviso de cancelación y regresando al flujo principal sin cerrar la app.
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        # Limpiamos 'vista_', convertimos 'crear_registro' -> 'Crear Registro' y asignamos el nombre_limpio al title del Panel
+        nombre_limpio = func.__name__.replace("vista_", "").replace("_", " ").title()
+        panel = Panel(
+            f"Pulsa [cyan][CTRL]+[C][/cyan] para cancelar este proceso y volver al menú",
+            title=f"[bold white]📌 {nombre_limpio}[/bold white]"
+        )
+        console.print(panel, justify="left")
+        print()
+        
+        try:
+            return func(*args, **kwargs)
+        except KeyboardInterrupt:
+            console.print("\n\n[yellow]⚠️  Operación cancelada por el usuario.[/yellow]")
+            
+    return wrapper
 
 
 # ==========================================
@@ -52,17 +83,10 @@ def mostrar_menu():
     print("2. Leer Registros............ (Read)")
     print("3. Actualizar Registro....... (Update)")
     print("4. Eliminar Registro......... (Delete)")
-    print("\n0. Salir..................... (Exit)")
+    print("5. Salir..................... (Exit)")
 
-    return console.input('\nSelecciona una opción (0-5) > ')
+    return console.input('\nSelecciona una opción (1-5) > ')
 
-
-def ctrl_c():
-    """
-    Mensaje de excepción KeyboardInterrupt.
-    """
-    console.print("\n\n⚠️  Operación cancelada por el usuario.")
-    return
 
 def pausar():
     """
@@ -93,7 +117,7 @@ def pedir_entrada(prompt, formato, msg_error="❌ ERROR", trans=lambda x: x.stri
     """
     intentos = 0
     while True:
-        respuesta = trans(console.input(prompt))
+        respuesta = trans(console.input(prompt).strip())
         if re.fullmatch(formato, respuesta): 
             return respuesta
 
@@ -111,16 +135,14 @@ def mostrar_despedida():
     """
     Imprime el mensaje gráfico final de agradecimiento al salir de la aplicación.
     """
-    #console.print(f"\n\n[cyan]👋 ¡Gracias por usar la aplicación! Hasta pronto.[/cyan]\n")
-    for char in "\nSee you later,🐊 alligator...\n\n":
-        console.print(char, style="bold green", end="", highlight=False)
-        time.sleep(0.04)
+    console.print(f"\n\n[cyan]👋 ¡Gracias por usar la aplicación! Hasta pronto.[/cyan]\n")
 
 
 # ===========================================
-# VISTAS
+# VISTAS PROTEGIDAS CON @capturar_cancelacion
 # ===========================================
 
+@capturar_cancelacion
 def vista_crear_registro(registros):
     """
     Gestiona la toma de fichajes de la jornada diaria.
@@ -133,12 +155,6 @@ def vista_crear_registro(registros):
     Args:
         registros (list): Lista global de diccionarios con los fichajes en memoria.
     """
-    panel = Panel(
-        f"Pulsa [cyan][CTRL]+[C][/cyan] para cancelar este proceso y volver al menú",
-        title=f"[bold white]📌 Crear registro[/bold white]"
-    )
-    console.print(panel, justify="left")
-    print()
     # ==============================================================================
     # EXPRESIÓN REGULAR: Código del empleado (Número entre 1 a 999)
     # PATRÓN: r"^[1-9]\d{0,2}$"
@@ -275,6 +291,7 @@ def vista_crear_registro(registros):
     console.print(panel, justify="left")
 
 
+@capturar_cancelacion
 def vista_leer_registros(registros):
     """
     Construye y proyecta la consulta de fichajes del sistema.
@@ -286,12 +303,6 @@ def vista_leer_registros(registros):
     Args:
         registros (list): Lista global de diccionarios con los fichajes almacenados.
     """
-    panel = Panel(
-        f"¿A que no tienes tiempo de pulsar [cyan][CTRL]+[C][/cyan] para cancelar antes de que acabe?",
-        title=f"[bold white]📌 Leer registros[/bold white]"
-    )
-    console.print(panel, justify="left")
-    print()
     if not registros:
         console.print("\n[yellow]📋 No hay ningún registro guardado en el sistema.[/yellow]\n")
         return
@@ -329,6 +340,7 @@ def vista_leer_registros(registros):
     print()
 
 
+@capturar_cancelacion
 def vista_actualizar_registro(registros):
     """
     Permite la modificación manual de horas de entrada/salida de un fichaje existente.
@@ -339,12 +351,6 @@ def vista_actualizar_registro(registros):
     Args:
         registros (list): Lista global de diccionarios con los fichajes almacenados.
     """
-    panel = Panel(
-        f"Pulsa [cyan][CTRL]+[C][/cyan] para cancelar este proceso y volver al menú",
-        title=f"[bold white]📌 Actualizar registro[/bold white]"
-    )
-    console.print(panel, justify="left")
-    print()
     if not registros:
         console.print("\n[bold yellow]📋 No hay registros en el sistema para actualizar.[/bold yellow]\n")
         return
@@ -390,6 +396,7 @@ def vista_actualizar_registro(registros):
     console.print(panel, justify="left")
 
 
+@capturar_cancelacion
 def vista_eliminar_registro(registros):
     """
     Gestiona la eliminación permanente de un registro de fichaje.
@@ -400,12 +407,6 @@ def vista_eliminar_registro(registros):
     Args:
         registros (list): Lista global de diccionarios con los fichajes almacenados.
     """
-    panel = Panel(
-        f"Pulsa [cyan][CTRL]+[C][/cyan] para cancelar este proceso y volver al menú",
-        title=f"[bold white]📌 Eliminar registro[/bold white]"
-    )
-    console.print(panel, justify="left")
-    print()
     if not registros:
         console.print("\n[bold yellow]📋 No hay registros en el sistema para eliminar.[/bold yellow]\n")
         return
