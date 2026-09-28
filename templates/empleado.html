@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ficha Empleado - {{ id_emp }}</title>
+    <style>
+        body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: center; }
+        th { background: #0f172a; color: white; }
+        .resumen { background: #f0fdf4; border: 1px solid #86efac; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+        .btn { background: #64748b; color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <h1>👤 Historial Individual: {{ id_emp }}</h1>
+    {% include 'nav.html' %}
+
+    <div class="resumen">
+        <p style="margin: 0; font-size: 1.1rem;">
+            Total tiempo computado para <strong>{{ id_emp }}</strong>: <strong>{{ total_horas }}</strong>
+        </p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Entrada</th>
+                <th>Salida</th>
+                <th>Total Horas</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in fichajes %}
+            <tr>
+                <td>{{ r.fecha }}</td>
+                <td>{{ r.hora_entrada }}</td>
+                <td>{{ r.hora_salida or 'PENDIENTE' }}</td>
+                <td><strong>{{ r.total_horas }}</strong></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">No hay fichajes registrados para este empleado.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <br>
+    <a href="/" class="btn">⬅️ Volver a Fichajes</a>
+
+</body>
+</html>

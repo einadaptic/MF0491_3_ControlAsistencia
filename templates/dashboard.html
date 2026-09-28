@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Control Asistencia</title>
+    <style>
+        body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 1.2rem; border-radius: 8px; text-align: center; }
+        .card h2 { margin: 0; font-size: 2rem; color: #2563eb; }
+        .card p { margin: 0.5rem 0 0 0; color: #64748b; font-size: 0.9rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>📊 Resumen y Métricas Globale</h1>
+    {% include 'nav.html' %}
+
+    <div class="kpi-grid">
+        <div class="card">
+            <h2>{{ total_fichajes }}</h2>
+            <p>Total Registros</p>
+        </div>
+        <div class="card">
+            <h2>{{ fichajes_hoy }}</h2>
+            <p>Fichajes Hoy</p>
+        </div>
+        <div class="card">
+            <h2>{{ empleados_unicos }}</h2>
+            <p>Empleados Registrados</p>
+        </div>
+        <div class="card">
+            <h2>{{ pendientes }}</h2>
+            <p>Jornadas Pendientes</p>
+        </div>
+        <div class="card">
+            <h2>{{ total_horas }}</h2>
+            <p>Horas Computadas</p>
+        </div>
+    </div>
+
+</body>
+</html>
