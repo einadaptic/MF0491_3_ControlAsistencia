@@ -1,1 +1,0 @@
-const boton=document.querySelector('.menu-boton'),menu=document.querySelector('.menu');if(boton&&menu)boton.addEventListener('click',()=>{const abierto=menu.classList.toggle('abierto');boton.setAttribute('aria-expanded',String(abierto))});
